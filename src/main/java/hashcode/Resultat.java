@@ -1,10 +1,16 @@
 package hashcode;
 
+import hashcode.domain.Cache;
+import hashcode.domain.Video;
 import lombok.Data;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 @Data
 public class Resultat {
 
-    // TODO mettre ici les données qui sortiront de l'algo, à donner à manger au writer
+    Map<Cache, List<Video>> resultats;
 
 }
