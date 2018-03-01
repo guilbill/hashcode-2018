@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import hashcode.domain.Ride;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -19,20 +20,27 @@ public class Reader {
 				BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
 
 			String[] firstLine = br.readLine().split(" ");
-			int nb1 = getInt(firstLine, 0);
-			int nb2 = getInt(firstLine, 1);
+			situation.setNbRows(getInt(firstLine, 0));
+			situation.setNbColumns(getInt(firstLine, 1));
+			situation.setNbVehicles(getInt(firstLine, 2));
+			situation.setNbRides(getInt(firstLine, 3));
+			situation.setBonus(getInt(firstLine, 4));
+			situation.setNbSteps(getInt(firstLine, 5));
 
-			// TODO remplir l'objet Situation
-			for (int i = 0; i < nb1; i++) {
+			// Rides
+			for (int i = 0; i < situation.getNbRides(); i++) {
 				String[] elements = br.readLine().split(" ");
-
+				Ride ride = new Ride();
+				ride.setIndex(i);
+				ride.setRowStart(getInt(elements, 0));
+				ride.setColumnStart(getInt(elements, 1));
+				ride.setRowEnd(getInt(elements, 2));
+				ride.setColumnEnd(getInt(elements, 3));
+				ride.setEarliestStart(getInt(elements, 4));
+				ride.setLatestFinish(getInt(elements, 5));
+				situation.getRides().add(ride);
 			}
 
-			String line;
-			while ((line = br.readLine()) != null) {
-				String[] elements = line.split(" ");
-				log.info(line);
-			}
 		} catch (IOException ioe) {
 			log.error(ioe.getMessage(), ioe);
 		}
