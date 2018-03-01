@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class Vehicle {
 
-    int id;
+    int currentRow, currentColumn = 0;
+
 }

@@ -12,4 +12,6 @@ public class Ride {
 	private int columnEnd;
 	private int earliestStart;
 	private int latestFinish;
+	private int distance;
+	private boolean dejaPris;
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hashcode.domain.Ride;
+import hashcode.domain.Vehicle;
 import lombok.Data;
 
 @Data
@@ -17,5 +18,6 @@ public class Situation {
 	private int nbSteps;
 
 	private List<Ride> rides = new ArrayList<>();
+
 
 }

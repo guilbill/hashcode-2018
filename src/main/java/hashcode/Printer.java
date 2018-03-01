@@ -33,8 +33,7 @@ public class Printer {
 
     private static void writeResult(Writer writer, Resultat resultat) {
 	    resultat.getMapResult().entrySet().stream()
-                .sorted(Comparator.comparingInt(e -> e.getKey().getId()))
-                .map(e -> e.getKey().getId() + " " + e.getValue().stream().map(Ride::getId).map(String::valueOf).collect(Collectors.joining(" ")))
+                .map(e -> e.getValue().size() + " " + e.getValue().stream().map(Ride::getIndex).map(String::valueOf).collect(Collectors.joining(" ")))
                 .forEach(s -> {
                     try {
                         writer.write(s);
@@ -44,7 +43,7 @@ public class Printer {
                 });
     }
 
-    private static File findFreeFile(String filename) {
+    private static File findFreeFile(String filename) throws IOException {
 		int index = 1;
 		File file = new File("output/" + filename + String.format(FILE_SUFFIX, index));
 		while (file.exists()) {

@@ -38,6 +38,11 @@ public class Reader {
 				ride.setColumnEnd(getInt(elements, 3));
 				ride.setEarliestStart(getInt(elements, 4));
 				ride.setLatestFinish(getInt(elements, 5));
+				ride.setDistance(HashCodeUtil.distance(
+						ride.getRowStart(),
+						ride.getColumnStart(),
+						ride.getRowEnd(),
+						ride.getColumnEnd()));
 				situation.getRides().add(ride);
 			}
 
