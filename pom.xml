@@ -3,4 +3,19 @@
   <groupId>hashcode</groupId>
   <artifactId>team</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+
+
+  <properties>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+  </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.20</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 </project>

@@ -8,11 +8,11 @@ import java.io.Writer;
 
 public class Printer {
 
-	public static void printFile(String filename) {
+	public static void printFile(String filename, Resultat resultat) {
 		System.out.println("---------- Printing file " + filename + " ----------");
 		try (Writer writer = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream("output/" + filename + ".out"), "utf-8"))) {
-			writer.write("something");
+			writer.write("something"); // TODO parcourir les lignes de resultat et les écrire
 		} catch (IOException e) {
 			System.err.println(e);
 		}
