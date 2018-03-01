@@ -5,7 +5,7 @@ import hashcode.dumb.DumbAlgo;
 public class Main {
 
 	public static void main(String[] args) {
-		String[] files = { "a_example"/*, "b_should_be_easy", "c_no_hurry", "d_metropolis", "e_high_bonus"*/ };
+		String[] files = { "a_example", "b_should_be_easy", "c_no_hurry", "d_metropolis", "e_high_bonus" };
 		for (String filename : files) {
 			processOneFile(filename);
 		}

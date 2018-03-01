@@ -1,7 +1,6 @@
 package hashcode;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import hashcode.domain.Ride;
 import hashcode.domain.Vehicle;
@@ -17,7 +16,7 @@ public class Situation {
 	private int bonus;
 	private int nbSteps;
 
-	private List<Ride> rides = new ArrayList<>();
+	private SortedSet<Ride> rides = new TreeSet<>(Comparator.comparingInt(Ride::getEarliestStart));
 
 
 }

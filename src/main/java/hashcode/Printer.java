@@ -18,9 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Printer {
 
-	private static final String FILE_SUFFIX = ".out.%03d";
+    private static final String FILE_SUFFIX = ".out.%03d";
+    public static final String OUTPUT = "/home/mfreche/Documents/output/";
 
-	public static void printFile(String filename, Resultat resultat) {
+    public static void printFile(String filename, Resultat resultat) {
 		log.info("---------- Printing file " + filename + " ----------");
 		try (Writer writer = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(findFreeFile(filename)), "utf-8"))) {
@@ -33,7 +34,8 @@ public class Printer {
 
     private static void writeResult(Writer writer, Resultat resultat) {
 	    resultat.getMapResult().entrySet().stream()
-                .map(e -> e.getValue().size() + " " + e.getValue().stream().map(Ride::getIndex).map(String::valueOf).collect(Collectors.joining(" ")))
+                .map(e -> e.getValue().size() + " " + e.getValue().stream().map(Ride::getIndex)
+                        .map(String::valueOf).collect(Collectors.joining(" "))+"\n")
                 .forEach(s -> {
                     try {
                         writer.write(s);
@@ -45,10 +47,10 @@ public class Printer {
 
     private static File findFreeFile(String filename) throws IOException {
 		int index = 1;
-		File file = new File("output/" + filename + String.format(FILE_SUFFIX, index));
+		File file = new File(OUTPUT + filename + String.format(FILE_SUFFIX, index));
 		while (file.exists()) {
 			index++;
-			file = new File("output/" + filename + String.format(FILE_SUFFIX, index));
+			file = new File(OUTPUT + filename + String.format(FILE_SUFFIX, index));
 		}
 		return file;
 	}

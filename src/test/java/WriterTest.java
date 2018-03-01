@@ -15,7 +15,7 @@ public class WriterTest {
         // GIVNE
         Resultat resultat = new Resultat();
         Map<Vehicle, List<Ride>> map = new HashMap<>();
-        Vehicle vehicle = new Vehicle();
+        Vehicle vehicle = new Vehicle(1);
         Ride ride = new Ride();
         ride.setIndex(3);
         Ride ride2 = new Ride();
