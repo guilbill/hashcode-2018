@@ -6,7 +6,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import hashcode.domain.Ride;
+import hashcode.domain.Vehicle;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -18,14 +24,27 @@ public class Printer {
 		log.info("---------- Printing file " + filename + " ----------");
 		try (Writer writer = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(findFreeFile(filename)), "utf-8"))) {
-			writer.write("something"); // TODO parcourir les lignes de resultat et les écrire
+			writeResult(writer, resultat);
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
 		}
 		log.info("---------- End of print ----------");
 	}
 
-	private static File findFreeFile(String filename) {
+    private static void writeResult(Writer writer, Resultat resultat) {
+	    resultat.getMapResult().entrySet().stream()
+                .sorted(Comparator.comparingInt(e -> e.getKey().getId()))
+                .map(e -> e.getKey().getId() + " " + e.getValue().stream().map(Ride::getId).map(String::valueOf).collect(Collectors.joining(" ")))
+                .forEach(s -> {
+                    try {
+                        writer.write(s);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    private static File findFreeFile(String filename) {
 		int index = 1;
 		File file = new File("output/" + filename + String.format(FILE_SUFFIX, index));
 		while (file.exists()) {
