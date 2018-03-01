@@ -12,6 +12,7 @@ public class Vehicle {
     int id;
 
     int currentRow, currentColumn = 0;
+    int step = 0;
 
     public int hashCode() {
         return id;

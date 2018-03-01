@@ -16,7 +16,7 @@ public class Situation {
 	private int bonus;
 	private int nbSteps;
 
-	private SortedSet<Ride> rides = new TreeSet<>(Comparator.comparingInt(Ride::getEarliestStart));
+	private List<Ride> rides = new ArrayList<>();
 
 
 }

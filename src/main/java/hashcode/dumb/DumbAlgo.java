@@ -14,23 +14,33 @@ public class DumbAlgo implements IAlgo {
     @Override
     public Resultat trouveMeilleurResultat(Situation situation) {
         Resultat result = new Resultat();
-        for ( int i = 0 ; i < situation.getNbVehicles(); i++ ) {
+
+        List<Vehicle> lstVehicle = new ArrayList<>();
+        for (int i = 0  ; i < situation.getNbVehicles() ; i++ ) {
             Vehicle vehicle = new Vehicle(i);
+            lstVehicle.add(vehicle);
             result.getMapResult().put(vehicle, new ArrayList<>());
-            List<Ride> lstRides = situation.getRides().stream()
-                    .filter(r -> !r.isDejaPris()).collect(Collectors.toList());
-            int step = 0;
-            while (true) {
-                Ride ride = donneRideLePlusProche(step, vehicle, lstRides);
+        }
+
+        while (!lstVehicle.isEmpty()) {
+            Iterator<Vehicle> itVehicle = lstVehicle.iterator();
+            while ( itVehicle.hasNext() ) {
+                Vehicle vehicle = itVehicle.next();
+                List<Ride> lstRides = situation.getRides().stream()
+                        .filter(r -> !r.isDejaPris()).collect(Collectors.toList());
+
+                Ride ride = donneRideLePlusProche(situation.getBonus(), vehicle, lstRides);
+                //Ride ride = donneRideAuMeilleurScore(situation.getBonus(), vehicle, lstRides);
                 if ( ride == null ) {
+                    itVehicle.remove();
                     break;
                 }
-                step += HashCodeUtil.getDistanceVehicleRide(vehicle, ride);
-                if (step <= ride.getEarliestStart()) {
-                    step = ride.getEarliestStart();
+                vehicle.setStep(vehicle.getStep() + HashCodeUtil.getDistanceVehicleRide(vehicle, ride));
+                if (vehicle.getStep() <= ride.getEarliestStart()) {
+                    vehicle.setStep(ride.getEarliestStart());
                 }
-                step += ride.getDistance();
-                if (step <= situation.getNbSteps()) {
+                vehicle.setStep(vehicle.getStep() +ride.getDistance());
+                if (vehicle.getStep() <= situation.getNbSteps()) {
                     result.getMapResult().get(vehicle).add(ride);
                     ride.setDejaPris(true);
                     vehicle.setCurrentRow(ride.getRowEnd());
@@ -38,6 +48,7 @@ public class DumbAlgo implements IAlgo {
                 } else {
                     lstRides.remove(ride);
                     if ( lstRides.isEmpty() ) {
+                        itVehicle.remove();
                         break;
                     }
                 }
@@ -47,23 +58,49 @@ public class DumbAlgo implements IAlgo {
         return result;
     }
 
-    private Ride donneRideLePlusProche(int step, Vehicle vehicle, Collection<Ride> rides) {
+    private Ride donneRideLePlusProche(int bonus, Vehicle vehicle, Collection<Ride> rides) {
         SortedSet<Ride> rideTries = new TreeSet<>(
                 (o1, o2) -> {
-                    int distanceo1 = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, o1, step);
-                    int distanceo2 = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, o2, step);
+                    int distanceo1 = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, o1);
+                    int distanceo2 = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, o2);
                     if ( distanceo1 == distanceo2 ) {
-                        // tri par distance
-                        return Integer.compare(o2.getDistance(), o1.getDistance());
+                        int scoreo1 = HashCodeUtil.calculeScore(bonus, vehicle, o1);
+                        int scoreo2 = HashCodeUtil.calculeScore(bonus, vehicle, o2);
+                        return Integer.compare(scoreo2, scoreo1);
                     } else {
                         return Integer.compare(distanceo1, distanceo2);
                     }
                 }
         );
         for ( Ride ride : rides ) {
-            int distancePourAllerAuDepart = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, ride, step);
+            int distancePourAllerAuDepart = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, ride);
             if (!ride.isDejaPris() &&
-                    step + distancePourAllerAuDepart + ride.getDistance() < ride.getLatestFinish()) {
+                    vehicle.getStep() + distancePourAllerAuDepart + ride.getDistance() < ride.getLatestFinish()) {
+                rideTries.add(ride);
+            }
+        }
+        return rideTries.isEmpty() ? null : rideTries.first();
+    }
+
+    private Ride donneRideAuMeilleurScore(int bonus, Vehicle vehicle, Collection<Ride> rides) {
+        SortedSet<Ride> rideTries = new TreeSet<>(
+                (o1, o2) -> {
+                    int scoreo1 = HashCodeUtil.calculeScore(bonus, vehicle, o1);
+                    int scoreo2 = HashCodeUtil.calculeScore(bonus, vehicle, o2);
+                    if ( scoreo1 == scoreo2 ) {
+                        return Integer.compare(
+                                HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle,o1),
+                                HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle,o2)
+                        );
+                    } else {
+                        return Integer.compare(scoreo2, scoreo1);
+                    }
+                }
+        );
+        for ( Ride ride : rides ) {
+            int distancePourAllerAuDepart = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, ride);
+            if (!ride.isDejaPris() &&
+                    vehicle.getStep() + distancePourAllerAuDepart + ride.getDistance() < ride.getLatestFinish()) {
                 rideTries.add(ride);
             }
         }
