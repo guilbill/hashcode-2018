@@ -1,6 +1,8 @@
 package hashcode;
 
 import java.util.Collection;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import hashcode.domain.Ride;
 import hashcode.domain.Vehicle;
@@ -55,8 +57,51 @@ public class HashCodeUtil {
 
 	public static int calculeScore(int bonus, Vehicle vehicle, Ride ride) {
 		return ride.getDistance() +
-				(getTempsDAttenteEventuel(vehicle, ride) == 0 ? bonus : 0);
+				(getAttente(vehicle, ride) >= 0 ? bonus : 0);
 	}
 
+	public static boolean rideFaisable(Vehicle vehicle, Ride ride, int nbSteps) {
+		int vehicleNextStep = vehicle.getStep() + HashCodeUtil.getDistanceVehicleRide(vehicle, ride);
+		if (vehicleNextStep <= ride.getEarliestStart()) {
+			vehicleNextStep = ride.getEarliestStart();
+		}
+		vehicleNextStep = vehicleNextStep + ride.getDistance();
 
+		return vehicleNextStep <= ride.getLatestFinish() && vehicleNextStep <= nbSteps;
+	}
+
+	public static Ride donneRideLePlusProche(Situation situation, Vehicle vehicle, Collection<Ride> rides) {
+		SortedSet<Ride> rideTries = new TreeSet<>((o1, o2) -> {
+			if (o1.equals(o2)) {
+				return 0;
+			}
+			int distanceo1 = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, o1);
+			int distanceo2 = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, o2);
+			if (distanceo1 == distanceo2) {
+				// int distanceOthers1 = HashCodeUtil.getMinRideRideDistance(o1, rides,
+				// situation.getNbRows() + situation.getNbColumns());
+				// int distanceOthers2 = HashCodeUtil.getMinRideRideDistance(o2, rides,
+				// situation.getNbRows() + situation.getNbColumns());
+				// if (distanceOthers1 == distanceOthers2) {
+				// int scoreo1 = HashCodeUtil.calculeScore(situation.getBonus(), vehicle, o1);
+				// int scoreo2 = HashCodeUtil.calculeScore(situation.getBonus(), vehicle, o2);
+				// return Integer.compare(scoreo2, scoreo1);
+				// }
+				// return Integer.compare(distanceOthers1, distanceOthers2);
+
+				int attente1 = HashCodeUtil.getTempsDAttenteEventuel(vehicle, o1);
+				int attente2 = HashCodeUtil.getTempsDAttenteEventuel(vehicle, o2);
+				if (attente1 == attente2) {
+					return Integer.compare(o1.getLatestFinish(), o2.getLatestFinish());
+				}
+				return Integer.compare(attente1, attente2);
+			} else {
+				return Integer.compare(distanceo1, distanceo2);
+			}
+		});
+		for (Ride ride : rides) {
+			rideTries.add(ride);
+		}
+		return rideTries.isEmpty() ? null : rideTries.first();
+	}
 }

@@ -22,6 +22,9 @@ public class DumbAlgo implements IAlgo {
 	@Override
 	public Resultat trouveMeilleurResultat(Situation situation) {
 		Resultat result = new Resultat();
+		int stepsPerdus = 0;
+		int bonus = 0;
+		int score = 0;
 
 		List<Vehicle> lstVehicle = new ArrayList<>();
 		for (int i = 0; i < situation.getNbVehicles(); i++) {
@@ -35,70 +38,44 @@ public class DumbAlgo implements IAlgo {
 			
 			while (itVehicle.hasNext()) {
 				Vehicle vehicle = itVehicle.next();
-				List<Ride> lstRides = situation.getRides().stream().filter(r -> !r.isDejaPris())
+				List<Ride> lstRides = situation.getRides().stream().filter(r -> !r.isDejaPris() && HashCodeUtil.rideFaisable(vehicle, r, situation.getNbSteps()))
 						.collect(Collectors.toList());
-				log.info("Vehicules restants: {}, Rides restants: {}", lstVehicle.size(), lstRides.size());
+				if (lstRides.isEmpty()) {
+					itVehicle.remove();
+					continue;
+				}
+				
+//				log.info("Vehicules restants: {}", lstVehicle.size());
 
-				Ride ride = donneRideLePlusProche(situation, vehicle, lstRides);
-				// Ride ride = donneRideAuMeilleurScore(situation.getBonus(), vehicle,
-				// lstRides);
+				Ride ride = HashCodeUtil.donneRideLePlusProche(situation, vehicle, lstRides);
+				// Ride ride = donneRideAuMeilleurScore(situation.getBonus(), vehicle, lstRides);
 				if (ride == null) {
 					itVehicle.remove();
-					break;
+					continue;
 				}
-				vehicle.setStep(vehicle.getStep() + HashCodeUtil.getDistanceVehicleRide(vehicle, ride));
-				if (vehicle.getStep() <= ride.getEarliestStart()) {
-					vehicle.setStep(ride.getEarliestStart());
+				
+				int vehicleNextStep = vehicle.getStep() + HashCodeUtil.getDistanceVehicleRide(vehicle, ride);
+				if (vehicleNextStep <= ride.getEarliestStart()) {
+					stepsPerdus += ride.getEarliestStart() - vehicleNextStep;
+					bonus++;
+					vehicleNextStep = ride.getEarliestStart();
 				}
-				vehicle.setStep(vehicle.getStep() + ride.getDistance());
-				if (vehicle.getStep() <= situation.getNbSteps()) {
-					result.getMapResult().get(vehicle).add(ride);
-					ride.setDejaPris(true);
-					vehicle.setCurrentRow(ride.getRowEnd());
-					vehicle.setCurrentColumn(ride.getColumnEnd());
-				} else {
-					lstRides.remove(ride);
-					if (lstRides.isEmpty()) {
-						itVehicle.remove();
-						break;
-					}
-				}
+				vehicleNextStep = vehicleNextStep + ride.getDistance();
+				
+				score += HashCodeUtil.calculeScore(situation.getBonus(), vehicle, ride);
+				vehicle.setStep(vehicleNextStep);
+				result.getMapResult().get(vehicle).add(ride);
+				ride.setDejaPris(true);
+				vehicle.setCurrentRow(ride.getRowEnd());
+				vehicle.setCurrentColumn(ride.getColumnEnd());
 			}
-
 		}
+		
+		List<Ride> lstRides = situation.getRides().stream().filter(r -> !r.isDejaPris())
+				.collect(Collectors.toList());
+		log.info("rides restants: {}/{}, bonus: {}/{}, score: {}, steps perdus: {}", lstRides.size(), situation.getNbSteps(), bonus, situation.getNbSteps(), score, stepsPerdus);
+		
 		return result;
-	}
-
-	private Ride donneRideLePlusProche(Situation situation, Vehicle vehicle, Collection<Ride> rides) {
-		SortedSet<Ride> rideTries = new TreeSet<>((o1, o2) -> {
-			if (o1.equals(o2)) {
-				return 0;
-			}
-			int distanceo1 = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, o1);
-			int distanceo2 = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, o2);
-			if (distanceo1 == distanceo2) {
-//				int distanceOthers1 = HashCodeUtil.getMinRideRideDistance(o1, rides,
-//						situation.getNbRows() + situation.getNbColumns());
-//				int distanceOthers2 = HashCodeUtil.getMinRideRideDistance(o2, rides,
-//						situation.getNbRows() + situation.getNbColumns());
-//				if (distanceOthers1 == distanceOthers2) {
-					 int scoreo1 = HashCodeUtil.calculeScore(situation.getBonus(), vehicle, o1);
-					 int scoreo2 = HashCodeUtil.calculeScore(situation.getBonus(), vehicle, o2);
-					 return Integer.compare(scoreo2, scoreo1);
-//				}
-//				return Integer.compare(distanceOthers1, distanceOthers2);
-			} else {
-				return Integer.compare(distanceo1, distanceo2);
-			}
-		});
-		for (Ride ride : rides) {
-			int distancePourAllerAuDepart = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, ride);
-			if (!ride.isDejaPris()
-					&& vehicle.getStep() + distancePourAllerAuDepart + ride.getDistance() < ride.getLatestFinish()) {
-				rideTries.add(ride);
-			}
-		}
-		return rideTries.isEmpty() ? null : rideTries.first();
 	}
 
 	private Ride donneRideAuMeilleurScore(int bonus, Vehicle vehicle, Collection<Ride> rides) {

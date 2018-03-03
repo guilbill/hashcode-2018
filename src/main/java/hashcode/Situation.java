@@ -1,12 +1,14 @@
 package hashcode;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import hashcode.domain.Ride;
-import hashcode.domain.Vehicle;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString(exclude = "rides")
 public class Situation {
 
 	private int nbRows;

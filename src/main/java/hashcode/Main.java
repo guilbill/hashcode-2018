@@ -13,7 +13,7 @@ public class Main {
 
 	private static void processOneFile(String filename) {
 		Situation situation = Reader.readFile(filename);
-		IAlgo algo = new DumbAlgo(); // TODO faudrait écrire un vrai algo pour que ça marche
+		IAlgo algo = new DumbAlgo();
 		Resultat resultat = algo.trouveMeilleurResultat(situation);
 		Printer.printFile(filename, resultat);
 	}
