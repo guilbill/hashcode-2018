@@ -45,10 +45,8 @@ public class DumbAlgo implements IAlgo {
 					continue;
 				}
 				
-//				log.info("Vehicules restants: {}", lstVehicle.size());
-
 				Ride ride = HashCodeUtil.donneRideLePlusProche(situation, vehicle, lstRides);
-				// Ride ride = donneRideAuMeilleurScore(situation.getBonus(), vehicle, lstRides);
+//				 Ride ride = donneRideAuMeilleurScore(situation.getBonus(), vehicle, lstRides);
 				if (ride == null) {
 					itVehicle.remove();
 					continue;
@@ -73,7 +71,7 @@ public class DumbAlgo implements IAlgo {
 		
 		List<Ride> lstRides = situation.getRides().stream().filter(r -> !r.isDejaPris())
 				.collect(Collectors.toList());
-		log.info("rides restants: {}/{}, bonus: {}/{}, score: {}, steps perdus: {}", lstRides.size(), situation.getNbSteps(), bonus, situation.getNbSteps(), score, stepsPerdus);
+		log.info("rides restants: {}/{}, bonus: {}/{}, score: {}, steps perdus: {}", lstRides.size(), situation.getNbRides(), bonus, situation.getNbRides(), score, stepsPerdus);
 		
 		return result;
 	}
@@ -90,11 +88,7 @@ public class DumbAlgo implements IAlgo {
 			}
 		});
 		for (Ride ride : rides) {
-			int distancePourAllerAuDepart = HashCodeUtil.getDistanceVehicleRidePlusAttente(vehicle, ride);
-			if (!ride.isDejaPris()
-					&& vehicle.getStep() + distancePourAllerAuDepart + ride.getDistance() < ride.getLatestFinish()) {
-				rideTries.add(ride);
-			}
+			rideTries.add(ride);
 		}
 		return rideTries.isEmpty() ? null : rideTries.first();
 	}

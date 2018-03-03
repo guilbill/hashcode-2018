@@ -1,6 +1,7 @@
 package hashcode;
 
 import hashcode.dumb.DumbAlgo;
+import hashcode.dumb.NoHurryAlgo;
 
 public class Main {
 
@@ -14,6 +15,9 @@ public class Main {
 	private static void processOneFile(String filename) {
 		Situation situation = Reader.readFile(filename);
 		IAlgo algo = new DumbAlgo();
+		if (filename.equals("c_no_hurry")) {
+			algo = new NoHurryAlgo();
+		}
 		Resultat resultat = algo.trouveMeilleurResultat(situation);
 		Printer.printFile(filename, resultat);
 	}
