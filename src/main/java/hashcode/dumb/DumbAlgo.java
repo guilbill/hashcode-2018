@@ -3,7 +3,6 @@ package hashcode.dumb;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -30,34 +29,32 @@ public class DumbAlgo implements IAlgo {
 
 		while (!lstVehicle.isEmpty()) {
 			lstVehicle.stream().sorted(Comparator.comparing(Vehicle::getStep));
-			Iterator<Vehicle> itVehicle = lstVehicle.iterator();
-			while ( itVehicle.hasNext() ) {
-				Vehicle vehicle = itVehicle.next();
-				List<Ride> lstRides = situation.getRides().stream()
-						.filter(r -> !r.isDejaPris()).collect(Collectors.toList());
 
-				Ride ride = donneRideLePlusProche(situation.getBonus(), vehicle, lstRides);
-				//Ride ride = donneRideAuMeilleurScore(situation.getBonus(), vehicle, lstRides);
-				if ( ride == null ) {
-					itVehicle.remove();
-					break;
-				}
-				vehicle.setStep(vehicle.getStep() + HashCodeUtil.getDistanceVehicleRide(vehicle, ride));
-				if (vehicle.getStep() <= ride.getEarliestStart()) {
-					vehicle.setStep(ride.getEarliestStart());
-				}
-				vehicle.setStep(vehicle.getStep() +ride.getDistance());
-				if (vehicle.getStep() <= situation.getNbSteps()) {
-					result.getMapResult().get(vehicle).add(ride);
-					ride.setDejaPris(true);
-					vehicle.setCurrentRow(ride.getRowEnd());
-					vehicle.setCurrentColumn(ride.getColumnEnd());
-				} else {
-					lstRides.remove(ride);
-					if ( lstRides.isEmpty() ) {
-						itVehicle.remove();
-						break;
-					}
+			Vehicle vehicle = lstVehicle.get(0);
+			List<Ride> lstRides = situation.getRides().stream()
+					.filter(r -> !r.isDejaPris()).collect(Collectors.toList());
+
+			Ride ride = donneRideLePlusProche(situation.getBonus(), vehicle, lstRides);
+			//Ride ride = donneRideAuMeilleurScore(situation.getBonus(), vehicle, lstRides);
+			if ( ride == null ) {
+				lstVehicle.remove(vehicle);
+				continue;
+			}
+			vehicle.setStep(vehicle.getStep() + HashCodeUtil.getDistanceVehicleRide(vehicle, ride));
+			if (vehicle.getStep() <= ride.getEarliestStart()) {
+				vehicle.setStep(ride.getEarliestStart());
+			}
+			vehicle.setStep(vehicle.getStep() +ride.getDistance());
+			if (vehicle.getStep() <= situation.getNbSteps()) {
+				result.getMapResult().get(vehicle).add(ride);
+				ride.setDejaPris(true);
+				vehicle.setCurrentRow(ride.getRowEnd());
+				vehicle.setCurrentColumn(ride.getColumnEnd());
+			} else {
+				lstRides.remove(ride);
+				if ( lstRides.isEmpty() ) {
+					lstVehicle.remove(vehicle);
+					continue;
 				}
 			}
 
